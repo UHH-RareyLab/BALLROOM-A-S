@@ -1,0 +1,30 @@
+[project]
+name = "bob-analyse-skripte"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "biopython>=1.86",
+    "kaleido>=1.2.0",
+    "levenshtein>=0.27.3",
+    "matplotlib-venn>=1.1.2",
+    "notebook>=7.6.0",
+    "pandas>=2.3.3",
+    "pingouin>=0.6.1",
+    "plotly>=6.5.2",
+    "plotnine>=0.15.1",
+    "progressbar2>=4.5.0",
+    "psycopg2>=2.9.11",
+    "pytest>=9.0.2",
+    "python-dotenv>=1.2.2",
+    "rdkit>=2025.9.2",
+    "requests>=2.32.5",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.16.3",
+    "seaborn>=0.13.2",
+    "sqlalchemy>=2.0.44",
+    "statannotations>=0.7.2",
+]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
