@@ -44,7 +44,13 @@ def create_performance_plot(dataframe, output_name, method_list):
     plot = p9.ggplot(dataframe, p9.aes(x="Method", y="Ratio", color="significance"))
     plot += p9.geom_point()
     plot += p9.coord_flip()
-    # plot += p9.theme(axis_text_x=p9.element_text(rotation=45, hjust=1, size=12))
+    plot += p9.theme(
+    text=p9.element_text(size=14),
+    axis_title=p9.element_text(size=16),
+    axis_text=p9.element_text(size=12),
+    legend_title=p9.element_text(size=13),
+    legend_text=p9.element_text(size=11),
+    plot_title=p9.element_text(size=18))
     plot += p9.scale_color_manual(values=colors)
     plot += p9.geom_hline(yintercept=50, color="black", linetype="dashed", size=1)
     plot += p9.ylab("Percentage correct activity pairs")

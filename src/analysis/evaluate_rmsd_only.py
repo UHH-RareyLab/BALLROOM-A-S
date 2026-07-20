@@ -84,6 +84,13 @@ plot = (
         position=p9.position_dodge(width=0.9),
         color="black",
     )
+    + p9.theme(
+    text=p9.element_text(size=14),
+axis_title = p9.element_text(size=16),
+axis_text = p9.element_text(size=12),
+legend_title = p9.element_text(size=13),
+legend_text = p9.element_text(size=11),
+plot_title = p9.element_text(size=18))
     + p9.xlim(-1, 20)
     + p9.scale_fill_manual(values=["#fde725", "#440154"])
     + p9.labs(fill="")

@@ -7,13 +7,13 @@ from src.utils import definitions
 
 
 def align_and_visualise_mols_mcs(
-    molecules_to_showcase, subimgsize=400, molperrow=3, output_name="test", align=True
+    molecules_to_showcase, subimgsize=400, molperrow=3, output_name="test", align=True, size_legendFont=45
 ):
     molecule_difference_path = definitions.output_path
     dopts = rdMolDraw2D.MolDrawOptions()
     dopts.addStereoAnnotation = True
     dopts.minFontSize = 45  # Ändert molekül aber nicht caption
-    dopts.legendFontSize = 45
+    dopts.legendFontSize = size_legendFont
     for mol in molecules_to_showcase:
         AllChem.Compute2DCoords(mol)
     if align:
@@ -45,7 +45,7 @@ def align_and_visualise_mols_mcs(
 
 
 def create_and_plot_mol_array_align(
-    molecule_names, names, output_name, align=True, size_molecule=800
+    molecule_names, names, output_name, align=True, size_molecule=800, legendFontSize=45
 ):
     molecules = []
     if not len(molecule_names) == len(names):
@@ -64,6 +64,7 @@ def create_and_plot_mol_array_align(
         output_name=output_name,
         align=align,
         subimgsize=size_molecule,
+        size_legendFont=legendFontSize
     )
 
 
@@ -77,7 +78,8 @@ mols = [
     "O=C(O[C@H](C(=O)O)CCC(=O)O)N[C@H](C(=O)O)CC(C)C",
     "CC(C)C[C@@H](NC(=O)O[C@H](CCC(=O)O)C(=O)O)C(=O)O",
 ]
-
+names.reverse()
+mols.reverse()
 create_and_plot_mol_array_align(
     mols,
     names,
@@ -122,6 +124,8 @@ names = [
     "CHEMBL1834095 / 3B27_B2T_A_1 \t 6900nM",
 ]
 mols = ["Clc1c(c2nc(SC)nc(n2)N)c3c4c(c1)COCc4ccc3", "Clc1c(c2nc(SC)nc(n2)N)cccc1"]
+names.reverse()
+mols.reverse()
 create_and_plot_mol_array_align(
     mols,
     names,
@@ -140,12 +144,15 @@ mols = [
     "S1C(c2cc(NC(=O)c3ccc(NC(=O)C)cc3)c(N)cc2)=CC=C1",
     "Fc1ccc(c2cc(NC(=O)[C@@H]3C[C@@H]4O[C@H](C3)CC4)c(N)cc2)cc1",
 ]
+names.reverse()
+mols.reverse()
 create_and_plot_mol_array_align(
     mols,
     names,
     output_name="ballrooma_diff_2_pair.png",
     align=False,
     size_molecule=size_molecule,
+    legendFontSize=80
 )
 
 # diff 1
@@ -192,6 +199,8 @@ mols = [
     "O=C(NCc1ccc(S(=O)(=O)c2ccccc2)cc1)c1cnc2nccn2c1",
     "Cn1c(C(=O)NCc2ccc(S(=O)(=O)c3ccccc3)cc2)cc2ccncc21",
 ]
+names.reverse()
+mols.reverse()
 create_and_plot_mol_array_align(
     mols,
     names,
