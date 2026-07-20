@@ -62,19 +62,19 @@ Afterwards, you need to manually start all runs for DOCK, Vina, JAMDA and Boltz.
 
 JAMDA Dockings can be started at the ZBH with the following command:
 ```
-qsub -N BallroomJamda -M gutermuth@zbh.uni-hamburg.de -t 1-n -m a /work/gutermuth/bob_analyse_skripte/benchmark_docking_scripts/prepare_and_dock_jamda.sh /scratch/gutermuth/all_benchmark_dockings/presubmission_activityfinder_bugfix/general_dockings/docking_df_jamda.csv
+qsub -N BallroomJamda -M user@zbh.uni-hamburg.de -t 1-n -m a /pathto/prepare_and_dock_jamda.sh /pathto/docking_df_jamda.csv
 ```
 JAMDA rescoring can be started at the ZBH with the following command:
 ```
-qsub -N BallroomRescoring -M gutermuth@zbh.uni-hamburg.de -t 1-n -m a /work/gutermuth/bob_analyse_skripte/src/docking/rescore_jamda.sh /scratch/gutermuth/all_benchmark_dockings/presubmission_ballroom/general_dockings/docking_df_jamda.csv
+qsub -N BallroomRescoring -M user@zbh.uni-hamburg.de -t 1-n -m a /pathto/rescore_jamda.sh /pathto/docking_df_jamda.csv
 ```
 DOCK Dockings can be started at the ZBH with the following command:
 ```
-qsub -t 1-n /work/gutermuth/bob_analyse_skripte/src/docking/dock_dock.sh
+qsub -t 1-n /pathto/dock_dock.sh
 ```
 Vina Dockings can be started at the ZBH with the following command:
 ```
-qsub -t 1-n /work/gutermuth/bob_analyse_skripte/src/docking/dock_vina.sh
+qsub -t 1-n /pathto/dock_vina.sh
 ```
 Boltz Runs can be started using a different repo.
 
