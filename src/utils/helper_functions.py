@@ -4,7 +4,18 @@ import shutil
 import pandas as pd
 
 from src.generation.check_pair_benchmark_contradictions import check_targets_assays
+from src.generation.retrieve_bioactivity_info_from_chembl import get_target_clusters
 
+def create_target_merge_statistics(benchmark_path):
+    targets = []
+    for target in benchmark_path.glob("*"):
+        if target.is_file():
+            continue
+        targets.append(target.name)
+    merged_target_list = get_target_clusters(targets, 0.70)
+    target_clusters = [x for x in merged_target_list if len(x) > 1]
+    with open(benchmark_path / "target_clusters.json", "w") as f:
+        json.dump(target_clusters, f)
 
 def update_dict(dict1, dict2):
     changes = 0

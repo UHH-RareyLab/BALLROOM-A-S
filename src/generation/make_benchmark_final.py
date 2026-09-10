@@ -19,9 +19,7 @@ from src.generation.finalize_siena_benchmark import (
 )
 from src.generation.make_siena_clusters import make_siena_clusters
 from src.generation.retrieve_bioactivity_info_from_chembl import (
-    download_additional_assay_data_for_benchmark,
-    get_target_clusters,
-    merge_and_copy,
+    download_additional_assay_data_for_benchmark
 )
 from src.utils.definitions import (
     mm_strict,
@@ -174,14 +172,6 @@ class ActivityBenchmarkMaker:
         )
         benchmark_path = Path().cwd() / benchmark_name
         download_additional_assay_data_for_benchmark(benchmark_path)
-        targets = []
-        for target in benchmark_path.glob("*"):
-            if target.is_file():
-                continue
-            targets.append(target.name)
-        merged_target_list = get_target_clusters(targets, 0.70)
-        merge_and_copy(merged_target_list, benchmark_path)
-        download_benchmark(benchmark_path.parent / (benchmark_path.name + "_merged"))
 
     def export_settings_results(
         self,

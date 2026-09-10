@@ -8,16 +8,14 @@ from download_benchmark import download_pair_benchmark, download_mmp_pair_benchm
 from make_benchmark_final import ActivityBenchmarkMaker
 from make_siena_clusters import make_siena_clusters
 from src.utils.definitions import siena_path, sienatools_path, mm_strict
-from src.utils.helper_functions import cleanup_pair_benchmark
-from src.utils.helper_functions import create_stats_for_benchmark
-
+from src.utils.helper_functions import create_stats_for_benchmark, create_target_merge_statistics, cleanup_pair_benchmark
 
 def main():
     general_output_path = (
         Path(__file__).parent.parent.parent
         / "gutermuth"
         / "benchmark_directory"
-        / "presubmission_ballroom"
+        / "high_ediam"
     )
     ballrooma_path = general_output_path / "ballrooma"
     ballrooms_path = general_output_path / "ballrooms"
@@ -31,7 +29,7 @@ def main():
     benchmark.run(
         min_datapoints=1,
         min_difference=1,
-        ediam=0.4,
+        ediam=0.8,
         allowed_protein_matches=["Gold", "Silver", "Bronze"],
         allowed_molecule_matches=mm_strict,
         benchmark_name=raw_benchmark_path.name,
@@ -49,10 +47,11 @@ def main():
 
     make_siena_clusters(ballrooms_path, siena_path, sienatools_path, "pairs")
     make_siena_clusters(ballrooma_path, siena_path, sienatools_path, "pairs")
-    # old_ballrooma = Path("/home/gutermuth/master_table/benchmarks/BALLROOMA")
-    # old_ballrooms = Path("/home/gutermuth/master_table/benchmarks/BALLROOMS")
     create_stats_for_benchmark(ballrooma_path)
     create_stats_for_benchmark(ballrooms_path)
+    create_target_merge_statistics(ballrooma_path)
+    create_target_merge_statistics(ballrooms_path)
+
 
 
 if __name__ == "__main__":

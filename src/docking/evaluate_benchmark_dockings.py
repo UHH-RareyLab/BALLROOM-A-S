@@ -172,6 +172,7 @@ class ScoreProcessor:
     def process_benchmark(self, name, df):
         """Process a specific benchmark DataFrame."""
         all_scores = {method: {"ges": [0, 0]} for method in self.methods}
+        activity_scores = {}
         n_works = 0
         n_doesnt = 0
 
@@ -184,6 +185,10 @@ class ScoreProcessor:
             assay = row["Assay"]
             target = row["Target"]
             dockinto1, dockinto2 = row["Dockinto1"], row["Dockinto2"]
+            activity_type = row.get("Activity_Type", "unknown")
+
+            if activity_type not in activity_scores:
+                activity_scores[activity_type] = {method: {"ges": [0, 0]} for method in self.methods}
 
             # Convert SMILES to molecules
             mol1 = Chem.MolFromSmiles(smiles1)
@@ -255,7 +260,6 @@ class ScoreProcessor:
             # Compare scores and update metrics
             for method in self.methods:
                 val1 = self.resolve_method_scores(score_metrics, method)
-                # val1 = score_metrics.get(method)
                 if val1 is None:
                     continue
                 score1, score2 = val1
@@ -265,7 +269,6 @@ class ScoreProcessor:
                     continue
                 if method == "jamda_workingrmsd":
                     if id1 not in self.jamda_rmsd or id2 not in self.jamda_rmsd:
-                        # Not all rmsds present
                         print(
                             f"RMSD not found for {id1} or {id2} {id1 in self.jamda_rmsd}, {id2 in self.jamda_rmsd}"
                         )
@@ -282,23 +285,22 @@ class ScoreProcessor:
                             continue
 
                 # Decide which score indicates higher activity
-                if activity1 < activity2:
-                    if score1 > score2:
-                        self.increment_score(all_scores, method, target)
-                        n_works += 1
-                    else:
-                        self.increment_score(all_scores, method, target, success=False)
-                        n_doesnt += 1
+                success = (
+                    (activity1 < activity2 and score1 > score2)
+                    or (activity1 >= activity2 and score2 > score1)
+                )
+                self.increment_score(all_scores, method, target, success=success)
+                self.increment_score(activity_scores[activity_type], method, target, success=success)
+                if success:
+                    n_works += 1
                 else:
-                    if score2 > score1:
-                        self.increment_score(all_scores, method, target)
-                        n_works += 1
-                    else:
-                        self.increment_score(all_scores, method, target, success=False)
-                        n_doesnt += 1
+                    n_doesnt += 1
 
-        # Save results
+        # Save overall results
         self.save_results(name, all_scores)
+        # Save per-activity_type results
+        for act_type, act_data in activity_scores.items():
+            self.save_results(name, act_data, suffix=f"_{act_type}")
         return n_works, n_doesnt
 
     def increment_score(self, all_scores, method, target, success=True):
@@ -311,7 +313,7 @@ class ScoreProcessor:
         all_scores[method][target][1] += 1
         all_scores[method]["ges"][1] += 1
 
-    def save_results(self, benchmark_name, data):
+    def save_results(self, benchmark_name, data, suffix="all"):
         """Save the results to CSV and JSON."""
         # Prepare DataFrame
         records = []
@@ -323,8 +325,8 @@ class ScoreProcessor:
         df = pd.DataFrame(
             records, columns=["Method", "Target", "Positives", "Total", "Ratio"]
         )
-        df.to_csv(self.output_path / f"{benchmark_name}_rmsd.csv", index=False)
-        with open(self.output_path / f"{benchmark_name}_rmsd.json", "w") as f:
+        df.to_csv(self.output_path / f"{benchmark_name}_rmsd_{suffix}.csv", index=False)
+        with open(self.output_path / f"{benchmark_name}_rmsd_{suffix}.json", "w") as f:
             json.dump(data, f)
 
     def run(self):

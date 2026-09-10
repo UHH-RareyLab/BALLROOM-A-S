@@ -66,128 +66,130 @@ def create_performance_plot(dataframe, output_name, method_list):
     plot.save(base_output_path / output_name, units="mm")
 
 
-base_output_path = output_path
+suffixes = ["all", "_IC50", "_EC50", "_Ki", "_Kd"]
+for suffix in suffixes:
+    base_output_path = output_path
 
-mmp_data = pd.read_csv(base_output_path / "ballrooms_rmsd.csv")
-mmp_data = mmp_data[
-    ~mmp_data["Method"].isin(["jamda_rescoring", "jamda_workingrmsd"])
-]  # We do not want these entries for BALLLROOM S
-mmp_data.loc[mmp_data["Method"].astype(str) == "Vina", "Method"] = f"Autodock Vina"
-mmp_data.loc[mmp_data["Method"].astype(str) == "tpsa", "Method"] = "TPSA"
-mmp_data.loc[mmp_data["Method"].astype(str) == "masse", "Method"] = "Weight"
-mmp_data.loc[mmp_data["Method"].astype(str) == "logp", "Method"] = "cLogP"
-mmp_data.loc[mmp_data["Method"].astype(str) == "jamda", "Method"] = "JAMDA"
-mmp_data.loc[mmp_data["Method"].astype(str) == "DOCK", "Method"] = "DOCK"
-mmp_data.loc[
-    mmp_data["Method"].astype(str) == "boltz_pred", "Method"
-] = f"Boltz2 activity"
-mmp_data.loc[
-    mmp_data["Method"].astype(str) == "boltz_affinity", "Method"
-] = f"Boltz2 affinity"
-mmp_data.loc[
-    mmp_data["Method"].astype(str) == "nn_tobi", "Method"
-] = f"Nearest Neighbor"
-mmp_data.loc[
-    mmp_data["Method"].astype(str) == "jamda_rescoring", "Method"
-] = f"JAMDA Rescoring"
-mmp_data.loc[
-    mmp_data["Method"].astype(str) == "jamda_workingrmsd", "Method"
-] = f"JAMDA good poses"
+    mmp_data = pd.read_csv(base_output_path / f"ballrooms_rmsd_{suffix}.csv")
+    mmp_data = mmp_data[
+        ~mmp_data["Method"].isin(["jamda_rescoring", "jamda_workingrmsd"])
+    ]  # We do not want these entries for BALLLROOM S
+    mmp_data.loc[mmp_data["Method"].astype(str) == "Vina", "Method"] = f"Autodock Vina"
+    mmp_data.loc[mmp_data["Method"].astype(str) == "tpsa", "Method"] = "TPSA"
+    mmp_data.loc[mmp_data["Method"].astype(str) == "masse", "Method"] = "Weight"
+    mmp_data.loc[mmp_data["Method"].astype(str) == "logp", "Method"] = "cLogP"
+    mmp_data.loc[mmp_data["Method"].astype(str) == "jamda", "Method"] = "JAMDA"
+    mmp_data.loc[mmp_data["Method"].astype(str) == "DOCK", "Method"] = "DOCK"
+    mmp_data.loc[
+        mmp_data["Method"].astype(str) == "boltz_pred", "Method"
+    ] = f"Boltz2 activity"
+    mmp_data.loc[
+        mmp_data["Method"].astype(str) == "boltz_affinity", "Method"
+    ] = f"Boltz2 affinity"
+    mmp_data.loc[
+        mmp_data["Method"].astype(str) == "nn_tobi", "Method"
+    ] = f"Nearest Neighbor"
+    mmp_data.loc[
+        mmp_data["Method"].astype(str) == "jamda_rescoring", "Method"
+    ] = f"JAMDA Rescoring"
+    mmp_data.loc[
+        mmp_data["Method"].astype(str) == "jamda_workingrmsd", "Method"
+    ] = f"JAMDA good poses"
 
-redocking_data = pd.read_csv(base_output_path / "ballrooma_rmsd.csv")
-redocking_data.loc[
-    redocking_data["Method"].astype(str) == "Vina", "Method"
-] = "Autodock Vina"
-redocking_data.loc[redocking_data["Method"].astype(str) == "tpsa", "Method"] = "TPSA"
-redocking_data.loc[redocking_data["Method"].astype(str) == "masse", "Method"] = "Weight"
-redocking_data.loc[redocking_data["Method"].astype(str) == "logp", "Method"] = "cLogP"
-redocking_data.loc[redocking_data["Method"].astype(str) == "jamda", "Method"] = "JAMDA"
-redocking_data.loc[redocking_data["Method"].astype(str) == "DOCK", "Method"] = "DOCK"
-redocking_data.loc[
-    redocking_data["Method"].astype(str) == "boltz_pred", "Method"
-] = f"Boltz2 activity"
-redocking_data.loc[
-    redocking_data["Method"].astype(str) == "boltz_affinity", "Method"
-] = f"Boltz2 affinity"
-redocking_data.loc[
-    redocking_data["Method"].astype(str) == "nn_tobi", "Method"
-] = f"Nearest Neighbor"
-redocking_data.loc[
-    redocking_data["Method"].astype(str) == "jamda_rescoring", "Method"
-] = f"JAMDA Rescoring"
-redocking_data.loc[
-    redocking_data["Method"].astype(str) == "jamda_workingrmsd", "Method"
-] = f"JAMDA good poses"
+    redocking_data = pd.read_csv(base_output_path / f"ballrooma_rmsd_{suffix}.csv")
+    redocking_data.loc[
+        redocking_data["Method"].astype(str) == "Vina", "Method"
+    ] = "Autodock Vina"
+    redocking_data.loc[redocking_data["Method"].astype(str) == "tpsa", "Method"] = "TPSA"
+    redocking_data.loc[redocking_data["Method"].astype(str) == "masse", "Method"] = "Weight"
+    redocking_data.loc[redocking_data["Method"].astype(str) == "logp", "Method"] = "cLogP"
+    redocking_data.loc[redocking_data["Method"].astype(str) == "jamda", "Method"] = "JAMDA"
+    redocking_data.loc[redocking_data["Method"].astype(str) == "DOCK", "Method"] = "DOCK"
+    redocking_data.loc[
+        redocking_data["Method"].astype(str) == "boltz_pred", "Method"
+    ] = f"Boltz2 activity"
+    redocking_data.loc[
+        redocking_data["Method"].astype(str) == "boltz_affinity", "Method"
+    ] = f"Boltz2 affinity"
+    redocking_data.loc[
+        redocking_data["Method"].astype(str) == "nn_tobi", "Method"
+    ] = f"Nearest Neighbor"
+    redocking_data.loc[
+        redocking_data["Method"].astype(str) == "jamda_rescoring", "Method"
+    ] = f"JAMDA Rescoring"
+    redocking_data.loc[
+        redocking_data["Method"].astype(str) == "jamda_workingrmsd", "Method"
+    ] = f"JAMDA good poses"
 
-all_relevant_methods = [
-    "TPSA",
-    "cLogP",
-    "Weight",
-    "Boltz2 affinity",
-    "Nearest Neighbor",
-]
-traditional_relevant_methods = [
-    "TPSA",
-    "cLogP",
-    "Weight",
-    "DOCK",
-    "Autodock Vina",
-    "JAMDA",
-]
-rmsd_relevant_methods = ["Weight", "JAMDA", "JAMDA good poses", "JAMDA Rescoring"]
-significane = 0.05
+    all_relevant_methods = [
+        "TPSA",
+        "cLogP",
+        "Weight",
+        "Boltz2 affinity",
+        "Nearest Neighbor",
+    ]
+    traditional_relevant_methods = [
+        "TPSA",
+        "cLogP",
+        "Weight",
+        "DOCK",
+        "Autodock Vina",
+        "JAMDA",
+    ]
+    rmsd_relevant_methods = ["Weight", "JAMDA", "JAMDA good poses", "JAMDA Rescoring"]
+    significane = 0.05
 
-datasets = [redocking_data, mmp_data]
-for dataset in datasets:
-    upper_bound_list = []
-    lower_bound_list = []
-    best_method_trad_list = []
-    best_method_ml_list = []
-    for index, row in dataset.iterrows():
-        lower_bound, upper_bound = proportion_confint(
-            count=row["Positives"], nobs=row["Total"], alpha=significane
-        )
-        upper_bound_list.append(upper_bound * 100)
-        lower_bound_list.append(lower_bound * 100)
-    dataset["upper_bound"] = upper_bound_list
-    dataset["lower_bound"] = lower_bound_list
+    datasets = [redocking_data, mmp_data]
+    for dataset in datasets:
+        upper_bound_list = []
+        lower_bound_list = []
+        best_method_trad_list = []
+        best_method_ml_list = []
+        for index, row in dataset.iterrows():
+            lower_bound, upper_bound = proportion_confint(
+                count=row["Positives"], nobs=row["Total"], alpha=significane
+            )
+            upper_bound_list.append(upper_bound * 100)
+            lower_bound_list.append(lower_bound * 100)
+        dataset["upper_bound"] = upper_bound_list
+        dataset["lower_bound"] = lower_bound_list
 
-redocking_data["Benchmark"] = "BALLROOM A"
-redocking_data_ges = redocking_data[redocking_data["Target"] == "ges"]
+    redocking_data["Benchmark"] = "BALLROOM A"
+    redocking_data_ges = redocking_data[redocking_data["Target"] == "ges"]
 
-mmp_data["Benchmark"] = "BALLROOM S"
-mmp_data_ges = mmp_data[mmp_data["Target"] == "ges"]
+    mmp_data["Benchmark"] = "BALLROOM S"
+    mmp_data_ges = mmp_data[mmp_data["Target"] == "ges"]
 
-print(mmp_data.head())
-print(redocking_data.head())
-colors = {"BALLROOM A": "#666a90", "BALLROOM S": "#00461e"}
-colors = {"Best method": "blue", "Similar method": "grey", "Worse method": "red"}
-complete_data_ges = pd.concat([mmp_data_ges, redocking_data_ges])
-complete_data_ml = complete_data_ges[
-    complete_data_ges["Method"].isin(all_relevant_methods)
-]
-complete_data_trad = complete_data_ges[
-    complete_data_ges["Method"].isin(traditional_relevant_methods)
-]
-complete_data_rmsd = complete_data_ges[
-    complete_data_ges["Method"].isin(rmsd_relevant_methods)
-]
-complete_data_rmsd = complete_data_rmsd[
-    ~complete_data_rmsd["Benchmark"].isin(["BALLROOM S"])
-]
-complete_data_trad = annotate_significance_by_benchmark(complete_data_trad, significane)
-complete_data_ml = annotate_significance_by_benchmark(complete_data_ml, significane)
-complete_data_rmsd = annotate_significance_by_benchmark(complete_data_rmsd, significane)
+    print(mmp_data.head())
+    print(redocking_data.head())
+    colors = {"BALLROOM A": "#666a90", "BALLROOM S": "#00461e"}
+    colors = {"Best method": "blue", "Similar method": "grey", "Worse method": "red"}
+    complete_data_ges = pd.concat([mmp_data_ges, redocking_data_ges])
+    complete_data_ml = complete_data_ges[
+        complete_data_ges["Method"].isin(all_relevant_methods)
+    ]
+    complete_data_trad = complete_data_ges[
+        complete_data_ges["Method"].isin(traditional_relevant_methods)
+    ]
+    complete_data_rmsd = complete_data_ges[
+        complete_data_ges["Method"].isin(rmsd_relevant_methods)
+    ]
+    complete_data_rmsd = complete_data_rmsd[
+        ~complete_data_rmsd["Benchmark"].isin(["BALLROOM S"])
+    ]
+    complete_data_trad = annotate_significance_by_benchmark(complete_data_trad, significane)
+    complete_data_ml = annotate_significance_by_benchmark(complete_data_ml, significane)
+    complete_data_rmsd = annotate_significance_by_benchmark(complete_data_rmsd, significane)
 
 
-create_performance_plot(
-    complete_data_trad,
-    "traditional_methods_performance_rmsd.png",
-    traditional_relevant_methods,
-)
-create_performance_plot(
-    complete_data_ml, "ml_methods_performance_rmsd.png", all_relevant_methods
-)
-create_performance_plot(
-    complete_data_rmsd, "rmsd_performance.png", rmsd_relevant_methods
-)
+    create_performance_plot(
+        complete_data_trad,
+        f"traditional_methods_performance_rmsd_{suffix}.png",
+        traditional_relevant_methods,
+    )
+    create_performance_plot(
+        complete_data_ml, f"ml_methods_performance_rmsd_{suffix}.png", all_relevant_methods
+    )
+    create_performance_plot(
+        complete_data_rmsd, f"rmsd_performance_{suffix}.png", rmsd_relevant_methods
+    )
