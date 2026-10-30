@@ -1,130 +1,90 @@
-# Ballroom A / S Generation and docking scripts
+# BALLROOM A/S generation, docking, and analysis
 
-This repo contains all code that is used for the Ballroom A/S generation, docking and analysis.
-The repo is split into four different folders, 
-generation for benchmark generation, docking for everything related to docking and scoring,
-analysis for analysing both the benchmark and the docking and 
-utils for everything that is used by all folders. 
+This repository supports the generation of the BALLROOM A and BALLROOM S benchmarks, docking workflows, and analysis of benchmark and docking results. The workflows use Python scripts alongside institutional databases, external software, and data configured for the environment where they are run.
 
-## Python environment
-This repo uses uv, you can just uv run from the base repo and everything should install and work.
+## Repository layout
 
-## Generation 
+Code is organized under `src/`:
 
-[create_ballroomas_complete.py](src/generation/create_ballroomas_complete.py) 
-Is the main script for generating a new benchmark. 
-Most relevant options like the activity difference or linking quality can be directly altered here.
+- `src/generation/` — benchmark generation, filtering, MMP processing, and contradiction analyses.
+- `src/docking/` — preparation of docking inputs, cluster scripts, score extraction, and evaluation.
+- `src/analysis/` — publication-related plots and analyses.
+- `src/utils/` — shared definitions, database access, and helper functions.
+- `tests/` — unit and integration tests.
 
-[calc_activity_pairs.py](src/generation/calc_activity_pairs.py) 
-Is used to calculate all Molecule/Activity pairs in both benchmarks.
+## Requirements and setup
 
-[check_pair_benchmark_contradictions.py](src/generation/check_pair_benchmark_contradictions.py) 
-Calculates contradictions between pairs.
+- Python 3.13 or newer and [uv](https://docs.astral.sh/uv/).
+- Access to the ChEMBL and ActivityDB PostgreSQL databases on a given host for database-backed generation and tests.
+- Depending on the workflow, external data and software such as Siena, UNICON, AutoDockFR, JAMDA, and docking software. These are managed separately from the Python environment. ZBH software (including Siena, UNICON, and JAMDA) is available through the [SoftwareServer](software.zbh.uni-hamburg.de). Cluster workflows use an SGE environment and its scheduler.
 
-[contradictions_complete_chembl.py](src/generation/contradictions_complete_chembl.py) 
-Can be used to reproduce the ChEMBL contradiction analysis.
+From the repository root, create the local configuration file from the template:
 
-[create_mmp_directory.py](src/generation/create_mmp_directory.py) 
-Is used for Ballroom S benchmark generation.
-
-[datasetFilter.py](src/generation/datasetFilter.py) 
-Filters each assay dataset.
-
-[download_benchmark.py](src/generation/download_benchmark.py) 
-"Downloads" (rather copies) all pdb structures, extracts ligands, etc...
-
-[finalize_siena_benchmark.py](src/generation/finalize_siena_benchmark.py) 
-Calculates the siena pocket data.
-
-[generate_timecodes_for_benchmarks.py](src/generation/generate_timecodes_for_benchmarks.py) 
-This data can be used to append timecodes to the benchmark if one wants to create a timesplit. Not used in the final publication.
-
-[make_benchmark_final.py](src/generation/make_benchmark_final.py) 
-Is used to generate the preliminary benchmark that both BALLROOM A and S are based on.
-
-[make_siena_clusters.py](src/generation/make_siena_clusters.py)
-Calculates the connected components in Siena pocket data to find identical/overlapping pockets.
-
-[parse_mmp_output.py](src/generation/parse_mmp_output.py) 
-This handles the Output for multiple MMP versions, namely a builtin NAOMI one (not used in the final version) and the MMPDB version.
-Also calculates MMP Series. 
-
-[retrieve_bioactivity_info_from_chembl.py](src/generation/retrieve_bioactivity_info_from_chembl.py)
-Retrieves additional data from ChEMBL where necessary. 
-
-## Docking
-
-[create_all_dockings.py](src/docking/create_all_dockings.py) is the main script for the docking part. 
-This encompasses multiple different things, mainly figuring out which dockings to do ([figure_out_dockings.py](src/docking/figure_out_dockings.py)),
-preparing the pdb and ligand files for the dockings ([prepare_protein_ligands_for_docking.py](src/docking/prepare_protein_ligands_for_docking.py))
-and writing the different docking csvs so they can be done on the cluster ([create_docking_paths.py](src/docking/create_docking_paths.py)).
-Afterwards, you need to manually start all runs for DOCK, Vina, JAMDA and Boltz. 
-
-JAMDA Dockings can be started at the ZBH with the following command:
+```bash
+cp src/ballroom.env.template src/ballroom.env
 ```
-qsub -N BallroomJamda -M user@zbh.uni-hamburg.de -t 1-n -m a /pathto/prepare_and_dock_jamda.sh /pathto/docking_df_jamda.csv
+
+Edit `src/ballroom.env` with valid database credentials and local paths. The template lists the expected names; replace every `change` value with a real value. Do not commit credentials. The configuration is loaded by `src/utils/definitions.py` and includes paths for external tools, benchmark data, the PDB mirror, and docking outputs.
+
+Run Python commands from the repository root. `uv run` creates/updates the project environment and installs the Python dependencies declared in `pyproject.toml`. For example:
+
+```bash
+uv run pytest
 ```
-JAMDA rescoring can be started at the ZBH with the following command:
+
+## Workflows
+
+### Generate benchmarks
+
+[`src/generation/create_ballroomas_complete.py`](src/generation/create_ballroomas_complete.py) is the end-to-end generation script. It builds the preliminary benchmark, derives the crystal-based and MMP-based pair benchmarks, downloads/prepares structures, and calculates Siena clusters and summary statistics. It requires working database access, configured external tools, and the relevant input data.
+
+The script can be invoked from the repository root with:
+
+```bash
+PYTHONPATH=. uv run python src/generation/create_ballroomas_complete.py
 ```
-qsub -N BallroomRescoring -M user@zbh.uni-hamburg.de -t 1-n -m a /pathto/rescore_jamda.sh /pathto/docking_df_jamda.csv
+
+**Output note:** each run removes and recreates `gutermuth/benchmark_directory/benchmark_name` in the repository. Preserve any existing results there before running the script again.
+
+Other generation scripts provide individual steps but are not necessary to evoke, including:
+
+- [`make_benchmark_final.py`](src/generation/make_benchmark_final.py) — build the preliminary activity benchmark.
+- [`calc_activity_pairs.py`](src/generation/calc_activity_pairs.py) and [`create_mmp_directory.py`](src/generation/create_mmp_directory.py) — create crystal-based and MMP-based activity pairs.
+- [`download_benchmark.py`](src/generation/download_benchmark.py) and [`finalize_siena_benchmark.py`](src/generation/finalize_siena_benchmark.py) — prepare structure and pocket data.
+- [`check_pair_benchmark_contradictions.py`](src/generation/check_pair_benchmark_contradictions.py) and [`contradictions_complete_chembl.py`](src/generation/contradictions_complete_chembl.py) — contradiction analyses.
+
+### Prepare and run docking
+
+[`src/docking/create_all_dockings.py`](src/docking/create_all_dockings.py) coordinates the local preparation steps: selecting receptor/ligand combinations, preparing files, and writing docking input tables. It expects benchmark files in the paths configured by `base_benchmark_path`, existing score files, a PDB mirror, and the required preparation tools. Its outputs are under `docking_path/general_dockings`.
+
+After preparation, the docking jobs are run separately. The repository includes scripts for DOCK, Vina, and JAMDA; jobs are submitted on the SGE cluster with `qsub`. The shell scripts are configured for the cluster environment and include site-specific paths. When adapting them, update executable, input, output, working-directory, and email settings. For scripts that read one docking-table row per task, set the scheduler task range to the number of rows in that table. Boltz runs use a separate repository.
+
+Use the `extract_*` scripts in `src/docking/` to collect method outputs. [`evaluate_benchmark_dockings.py`](src/docking/evaluate_benchmark_dockings.py) compares methods on both benchmarks; it expects the benchmark CSVs and score files (including DOCK, Vina, JAMDA, Boltz, and neural-network outputs) in the configured locations.
+
+### Analysis
+
+Scripts in [`src/analysis/`](src/analysis/) produce publication-related results and plots. For example, `evaluate_rmsd_only.py` evaluates RMSD-filtered performance, `make_own_performance_plots.py` creates performance plots, and `molecule_plots.py` creates molecule figures. These scripts generally expect benchmark and/or score outputs to have already been generated; see each script for its specific inputs and output paths.
+
+## Configuration and output paths
+
+Paths are defined centrally in [`src/utils/definitions.py`](src/utils/definitions.py). In particular:
+
+- `base_benchmark_path` is expected to contain `presubmission_ballroom/ballrooma` and `presubmission_ballroom/ballrooms`, each with a `complete_data.csv` for docking evaluation.
+- `docking_path` holds `general_dockings/` and `scores/`.
+- The shared analysis output path is `gutermuth/output/` under the repository.
+
+Output roots vary by workflow; some generation scripts define paths directly in the script. Review the relevant paths when setting up a run, particularly if you want to retain existing results.
+
+## Tests
+
+Run the test suite from the repository root:
+
+```bash
+uv run pytest
 ```
-DOCK Dockings can be started at the ZBH with the following command:
-```
-qsub -t 1-n /pathto/dock_dock.sh
-```
-Vina Dockings can be started at the ZBH with the following command:
-```
-qsub -t 1-n /pathto/dock_vina.sh
-```
-Boltz Runs can be started using a different repo.
 
-Afterwards, the extract_ scripts can be used to extract all scores and save them to the score directory to later analyze.
+The test suite includes database integration tests that query both databases and a generation integration test that uses configured paths and external data/tools. The generation test recreates `base_benchmark_path/automatic_test`; use a location where replacing that test output is acceptable.
 
-The Nearest Neighbor can be done by generating a docking file using the [nearest_neighbor.py](src/docking/nearest_neighbor.py) file.
-Using the paths in the python script a scored output file can be generated from the docking file in the scores subdirectory.
 
-Finally, the [evaluate_benchmark_dockings.py](src/docking/evaluate_benchmark_dockings.py) script can be used to calculate the performance of all methods on both benchmarks.
-
-## Analysis
-This part contains all the code used to analyse both benchmarks and all additional analysis in the data.
-
-[analyse_chembl_pair_contradictions.py](src/analysis/analyse_chembl_pair_contradictions.py)
-Creates the ChEMBL only pair contradiction analysis for the publication. 
-
-[create_latex_defintions.py](src/analysis/create_latex_defintions.py)
-This is my lazy way to generate numbers for the publication. 
-Sadly, I cannot generate all numbers that way.
-
-[evaluate_rmsd_only.py](src/analysis/evaluate_rmsd_only.py)
-RMSD Performance analysis for the publication.
-
-[make_descriptional_benchmark_plots.py](src/analysis/make_descriptional_benchmark_plots.py)
-Additional description plots like activity types for the publication.
-
-[make_own_performance_plots.py](src/analysis/make_own_performance_plots.py)
-Make the performance plots for the publication.
-
-[molecule_plots.py](src/analysis/molecule_plots.py)
-Create the molecule plots for the publication.
-
-[sunburst.py](src/analysis/sunburst.py)
-Create a sunburst plot for each benchmark. 
-This is not directly used in the publication, but the numbers calculated are. 
-
-## Utils
-Here are some small but important functions and definitions.
-
-[db_interaction.py](src/utils/db_interaction.py)
-Handles queries to either the local ChEMBL version or ActivityDB.
-
-[helper_functions.py](src/utils/helper_functions.py)
-Some small helper functions.
-
-[definitions.py](src/utils/definitions.py)
-Here all relevant definitions, e.g. StrAcTable path, pdb mirror path, tool paths etc. are specifiied. 
-All relevant paths, passwords or similar definitions have to be provided using the ballroom.env.template file.
-You need to adjust many of these if you want to generate your own benchmark. 
-You will also need many tools from the Naomi ChemBioSuite.
-
-## Tests 
-Tests can be run using the command uv run pytest
+# Resulting datasets
+The resulting datasets can be found on the [FDR](https://www.fdr.uni-hamburg.de/record/21498).
